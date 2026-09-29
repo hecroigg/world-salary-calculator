@@ -2,7 +2,7 @@
 
 This project is configured as a static Next.js export, so Cloudflare Pages can deploy it from the `out` folder.
 
-## Recommended: deploy from the Cloudflare dashboard
+## Deploy from the Cloudflare dashboard
 
 1. Go to Cloudflare -> Workers & Pages -> Create application -> Pages.
 2. Select **Connect to Git**.
@@ -15,9 +15,9 @@ hecroigg/world-salary-calculator
 4. Use these build settings:
 
 ```txt
-Framework preset: Next.js / None
-Build command: pnpm install --no-frozen-lockfile && pnpm run pages:build
+Build command: npm install && npm run pages:build
 Deploy command: npx wrangler pages deploy out --project-name world-salary-calculator
+Preview command: npx wrangler pages dev out
 Root directory: /
 ```
 
@@ -34,22 +34,9 @@ NODE_VERSION=22
 ```bash
 git clone https://github.com/hecroigg/world-salary-calculator.git
 cd world-salary-calculator
-corepack enable
-pnpm install
-pnpm run pages:build
-pnpm run deploy:cloudflare
-```
-
-If Wrangler asks you to log in:
-
-```bash
-pnpm dlx wrangler login
-```
-
-Then run again:
-
-```bash
-pnpm run deploy:cloudflare
+npm install
+npm run pages:build
+npx wrangler pages deploy out --project-name world-salary-calculator
 ```
 
 ## Important notes
