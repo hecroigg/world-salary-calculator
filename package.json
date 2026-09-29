@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "pages:build": "next build",
-    "deploy:cloudflare": "pnpm run pages:build && wrangler pages deploy out --project-name world-salary-calculator",
+    "deploy:cloudflare": "npm run pages:build && npx wrangler pages deploy out --project-name world-salary-calculator",
     "start": "next start"
   },
   "dependencies": {
@@ -27,9 +27,8 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "tailwindcss": "4.2.1",
-    "typescript": "5.9.3",
-    "wrangler": "^4.42.1"
+    "typescript": "5.9.3"
   },
   "type": "module",
-  "packageManager": "pnpm@11.25.0"
+  "packageManager": "npm@10.9.2"
 }
