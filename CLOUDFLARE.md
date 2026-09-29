@@ -1,47 +1,49 @@
 # Deploy to Cloudflare Pages
 
-This project is configured as a static Next.js export, so Cloudflare Pages can deploy it from the `out` folder.
+This is a static Next.js export. Deploy it as a **Cloudflare Pages** project, not as a Cloudflare Worker.
 
-## Deploy from the Cloudflare dashboard
+## Create the project
 
-1. Go to Cloudflare -> Workers & Pages -> Create application -> Pages.
-2. Select **Connect to Git**.
-3. Choose the repository:
+1. Delete the old Worker project.
+2. In Cloudflare, go to **Workers & Pages** -> **Create application**.
+3. Choose **Pages**, then **Connect to Git**.
+4. Select this repository:
 
 ```txt
 hecroigg/world-salary-calculator
 ```
 
-4. Use these build settings:
+5. Use these settings:
 
 ```txt
+Production branch: main
 Build command: npm install && npm run pages:build
-Deploy command: npx wrangler pages deploy out --project-name world-salary-calculator
-Preview command: npx wrangler pages dev out
+Build output directory: out
 Root directory: /
+Environment variable: NODE_VERSION=22
 ```
 
-5. Cloudflare reads Node 22 from the committed `.node-version` file. If it asks you to set it manually, add:
+Cloudflare Pages publishes the `out` directory automatically. Do not enter a Wrangler deploy command or a preview command.
 
-```txt
-NODE_VERSION=22
-```
+## Why Pages
 
-6. Deploy.
+- The app is fully static through Next.js `output: "export"`.
+- `next build` writes the deployable website to `out`.
+- Pages serves the static files directly, including the country routes and SEO files.
+- A push to `main` will create the next deployment automatically.
 
-## Deploy from your terminal
+## Local check
 
 ```bash
-git clone https://github.com/hecroigg/world-salary-calculator.git
-cd world-salary-calculator
 npm install
 npm run pages:build
-npx wrangler pages deploy out --project-name world-salary-calculator
+npx serve out
 ```
 
-## Important notes
+The default address after deployment will be:
 
-- The app generates static pages for all current English and Spanish country routes.
-- Cloudflare should publish the contents of `out`.
-- Do not use `next start` on Cloudflare Pages; this project is exported statically.
-- After connecting the GitHub repo, every push to `main` should trigger a new deployment.
+```txt
+https://world-salary-calculator.pages.dev
+```
+
+Before adding a custom domain, the metadata, canonical URLs, sitemap and robots file use this address.
