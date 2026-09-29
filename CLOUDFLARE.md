@@ -4,7 +4,7 @@ This project is configured as a static Next.js export, so Cloudflare Pages can d
 
 ## Recommended: deploy from the Cloudflare dashboard
 
-1. Go to Cloudflare → Workers & Pages → Create application → Pages.
+1. Go to Cloudflare -> Workers & Pages -> Create application -> Pages.
 2. Select **Connect to Git**.
 3. Choose the repository:
 
@@ -17,14 +17,14 @@ hecroigg/world-salary-calculator
 ```txt
 Framework preset: Next.js / None
 Build command: pnpm install --no-frozen-lockfile && pnpm run pages:build
-Build output directory: out
+Deploy command: npx wrangler pages deploy out --project-name world-salary-calculator
 Root directory: /
 ```
 
-5. Add this environment variable if Cloudflare asks for a Node version:
+5. Cloudflare reads Node 22 from the committed `.node-version` file. If it asks you to set it manually, add:
 
 ```txt
-NODE_VERSION=20
+NODE_VERSION=22
 ```
 
 6. Deploy.
