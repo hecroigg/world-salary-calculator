@@ -8,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://world-salary-calculator.pages.dev/sitemap.xml",
+    sitemap: "https://world-salary-calculator.linkedlab-web.workers.dev/sitemap.xml",
   };
 }

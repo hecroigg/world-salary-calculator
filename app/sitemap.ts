@@ -1,35 +1,20 @@
 import type { MetadataRoute } from "next";
-import { countries, englishPath, spanishPath } from "@/lib/countries";
+import { countries } from "@/lib/countries";
+import { localizedPath, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-static";
-
-const base = "https://world-salary-calculator.pages.dev";
+const base = "https://world-salary-calculator.linkedlab-web.workers.dev";
+const locales: Locale[] = ["en", "es", "de", "fr"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return countries.flatMap((country) => [
-    {
-      url: base + englishPath(country),
+  return countries.flatMap((country) => {
+    const languages = Object.fromEntries(locales.map((locale) => [locale, base + localizedPath(country,locale)]));
+    return locales.map((locale) => ({
+      url: base + localizedPath(country,locale),
       lastModified: new Date("2026-09-29"),
       changeFrequency: "monthly" as const,
       priority: 0.9,
-      alternates: {
-        languages: {
-          en: base + englishPath(country),
-          es: base + spanishPath(country),
-        },
-      },
-    },
-    {
-      url: base + spanishPath(country),
-      lastModified: new Date("2026-09-29"),
-      changeFrequency: "monthly" as const,
-      priority: 0.9,
-      alternates: {
-        languages: {
-          en: base + englishPath(country),
-          es: base + spanishPath(country),
-        },
-      },
-    },
-  ]);
+      alternates: { languages: { ...languages, "x-default": base + localizedPath(country,"en") } },
+    }));
+  });
 }
