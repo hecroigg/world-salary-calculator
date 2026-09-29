@@ -1,49 +1,38 @@
-# Deploy to Cloudflare Pages
+# Deploy to Cloudflare Workers
 
-This is a static Next.js export. Deploy it as a **Cloudflare Pages** project, not as a Cloudflare Worker.
+This static Next.js export is deployed using Cloudflare Workers Static Assets.
 
-## Create the project
+## Cloudflare Git deployment
 
-1. Delete the old Worker project.
-2. In Cloudflare, go to **Workers & Pages** -> **Create application**.
-3. Choose **Pages**, then **Connect to Git**.
-4. Select this repository:
+When Cloudflare shows the Worker deployment form, use:
 
 ```txt
-hecroigg/world-salary-calculator
-```
-
-5. Use these settings:
-
-```txt
-Production branch: main
+Project name: world-salary-calculator
 Build command: npm install && npm run pages:build
-Build output directory: out
+Deploy command: npx wrangler deploy
+Preview command: npx wrangler dev
 Root directory: /
-Environment variable: NODE_VERSION=22
 ```
 
-Cloudflare Pages publishes the `out` directory automatically. Do not enter a Wrangler deploy command or a preview command.
+Set this build environment variable in the advanced settings:
 
-## Why Pages
+```txt
+NODE_VERSION=22
+```
 
-- The app is fully static through Next.js `output: "export"`.
-- `next build` writes the deployable website to `out`.
-- Pages serves the static files directly, including the country routes and SEO files.
-- A push to `main` will create the next deployment automatically.
+The committed `wrangler.jsonc` file tells Cloudflare to deploy the static website generated in `out`. The project name and the Wrangler name are intentionally identical.
+
+## What happens on deployment
+
+1. Cloudflare installs the npm dependencies.
+2. Next.js statically generates all routes into `out`.
+3. Wrangler uploads the `out` directory as Worker static assets.
+4. The Worker is available at its assigned `workers.dev` address.
 
 ## Local check
 
 ```bash
 npm install
 npm run pages:build
-npx serve out
+npx wrangler dev
 ```
-
-The default address after deployment will be:
-
-```txt
-https://world-salary-calculator.pages.dev
-```
-
-Before adding a custom domain, the metadata, canonical URLs, sitemap and robots file use this address.
