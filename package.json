@@ -9,7 +9,6 @@
     "dev": "next dev",
     "build": "next build",
     "pages:build": "next build",
-    "deploy:cloudflare": "npm run pages:build && npx wrangler pages deploy out --project-name world-salary-calculator",
     "start": "next start"
   },
   "dependencies": {
