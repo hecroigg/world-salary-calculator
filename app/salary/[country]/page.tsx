@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SalaryCalculator } from "@/components/salary-calculator";
+import { CountryPageContent } from "@/components/country-page-content";
 import { countries, getCountry } from "@/lib/countries";
 import { countryName, localizedPath } from "@/lib/i18n";
 
@@ -17,5 +17,5 @@ export async function generateMetadata({ params }: { params: Promise<{ country: 
 
 export default async function CountryPage({ params }: { params: Promise<{ country: string }> }) {
   const { country } = await params;
-  return <SalaryCalculator country={getCountry(country)} language="en"/>;
+  return <CountryPageContent country={getCountry(country)} locale="en"/>;
 }

@@ -1,3 +1,5 @@
-import { SalaryCalculator } from "@/components/salary-calculator";
+import type { Metadata } from "next";
+import { CountryPageContent } from "@/components/country-page-content";
 import { getCountry } from "@/lib/countries";
-export default function Home(){return <SalaryCalculator country={getCountry("germany")} language="en"/>}
+export const metadata: Metadata = { alternates: { canonical: "/salary/germany" }, robots: { index: false, follow: true } };
+export default function Home(){return <CountryPageContent country={getCountry("germany")} locale="en"/>}

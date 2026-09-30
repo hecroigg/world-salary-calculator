@@ -123,9 +123,13 @@ function france(annual: number, p: PrecisionOptions): Breakdown[] {
 }
 
 function netherlands(annual: number): Breakdown[] {
-  const grossTax = progressive(annual, [[75_518, 0.3582], [Infinity, 0.495]]);
-  const generalCredit = Math.max(0, 3_115 * (1 - Math.max(0, annual - 28_406) / 48_000));
-  const employmentCredit = annual <= 45_000 ? Math.min(5_500, annual * 0.12) : Math.max(0, 5_500 - (annual - 45_000) * 0.065);
+  const grossTax = progressive(annual, [[38_883, 0.3575], [78_426, 0.3756], [Infinity, 0.495]]);
+  const generalCredit = annual <= 29_736 ? 3_115 : Math.max(0, 3_115 - (annual - 29_736) * 0.06398);
+  let employmentCredit = 0;
+  if (annual <= 11_965) employmentCredit = annual * 0.08324;
+  else if (annual <= 25_845) employmentCredit = 996 + (annual - 11_965) * 0.31009;
+  else if (annual <= 45_592) employmentCredit = 5_300 + (annual - 25_845) * 0.0195;
+  else if (annual <= 132_920) employmentCredit = Math.max(0, 5_685 - (annual - 45_592) * 0.0651);
   return [item("Income tax and national insurance", "Impuesto y seguros nacionales", "Steuern und Volksversicherungen", "Impôt et assurances nationales", Math.max(0, grossTax - generalCredit - employmentCredit))];
 }
 
@@ -138,8 +142,23 @@ function canada(annual: number, p: PrecisionOptions): Breakdown[] {
   return [item("Federal income tax", "Impuesto federal", "Bundeseinkommensteuer", "Impôt fédéral", federal), item("Provincial tax", "Impuesto provincial", "Provinzsteuer", "Impôt provincial", province), item("CPP / QPP", "CPP / QPP", "CPP / QPP", "CPP / QPP", cpp), item("Employment Insurance", "Seguro de empleo", "Arbeitslosenversicherung", "Assurance-emploi", ei)];
 }
 
-function generic(country: Country, annual: number, p: PrecisionOptions): Breakdown[] {
-  const socialItems = country.social.map((social) => item(social.label, social.es, social.label, social.label, Math.min(annual, social.cap ?? annual) * social.rate));
+const contributionTranslations: Record<string, {de:string;fr:string}> = {
+  "Social Security": {de:"Sozialversicherung",fr:"Sécurité sociale"}, "Social security": {de:"Sozialversicherung",fr:"Sécurité sociale"},
+  "Social insurance": {de:"Sozialversicherung",fr:"Assurance sociale"}, "Social & health": {de:"Sozial- und Krankenversicherung",fr:"Assurance sociale et maladie"},
+  Pension: {de:"Rentenversicherung",fr:"Retraite"}, Health: {de:"Krankenversicherung",fr:"Assurance maladie"}, "Health insurance": {de:"Krankenversicherung",fr:"Assurance maladie"},
+  Unemployment: {de:"Arbeitslosenversicherung",fr:"Assurance chômage"}, "Care insurance": {de:"Pflegeversicherung",fr:"Assurance dépendance"},
+  "Long-term care": {de:"Pflegeversicherung",fr:"Assurance dépendance"}, "Pension contribution": {de:"Rentenbeitrag",fr:"Cotisation retraite"},
+  Disability: {de:"Erwerbsminderung",fr:"Invalidité"}, Sickness: {de:"Krankengeld",fr:"Maladie"},
+  "Labour market contribution": {de:"Arbeitsmarktbeitrag",fr:"Contribution au marché du travail"},
+  "Employee insurance": {de:"Arbeitnehmerversicherung",fr:"Assurance salariale"},
+  "National insurance (included in tax)": {de:"Volksversicherung (in Steuer enthalten)",fr:"Assurance nationale (incluse dans l’impôt)"},
+};
+
+function configuredCountry(country: Country, annual: number, p: PrecisionOptions): Breakdown[] {
+  const socialItems = country.social.map((social) => {
+    const translated = contributionTranslations[social.label] ?? {de:social.label,fr:social.label};
+    return item(social.label, social.es, translated.de, translated.fr, Math.min(annual, social.cap ?? annual) * social.rate);
+  });
   const socialTotal = socialItems.reduce((sum, entry) => sum + entry.amount, 0);
   const scheduleIncludesAllowance = country.tax[0]?.[1] === 0;
   const familyAllowance = (p.children ?? 0) * Math.min(country.allowance * 0.18, annual * 0.03);
@@ -162,7 +181,7 @@ export function calculate(country: Country, grossInput: number, period: "monthly
     case "france": breakdown = france(annual, precision); break;
     case "netherlands": breakdown = netherlands(annual); break;
     case "canada": breakdown = canada(annual, precision); break;
-    default: breakdown = generic(country, annual, precision);
+    default: breakdown = configuredCountry(country, annual, precision);
   }
   const annualDeductions = Math.min(annual * 0.75, breakdown.reduce((sum, entry) => sum + entry.amount, 0));
   const annualNet = Math.max(0, annual - annualDeductions);
