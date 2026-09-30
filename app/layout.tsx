@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { CookieConsent } from "@/components/cookie-consent";
 import "./globals.css";
+
+const adsensePublisherId = "ca-pub-8337311370258201";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://netsalarymap.online"),
   title: { default: "Net Salary Map - International Gross to Net Calculator", template: "%s | Net Salary Map" },
   description:
     "Compare gross and net salaries across 25 countries with transparent, country-specific tax estimates.",
+  other: {
+    "google-adsense-account": adsensePublisherId,
+  },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
@@ -28,6 +34,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
+        <Script
+          id="google-adsense"
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`}
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
         {children}
         <CookieConsent />
       </body>
