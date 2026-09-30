@@ -3,7 +3,7 @@ import { countries } from "@/lib/countries";
 import { localizedPath, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-static";
-const base = "https://world-salary-calculator.linkedlab-web.workers.dev";
+const base = "https://netsalarymap.online";
 const locales: Locale[] = ["en", "es", "de", "fr"];
 
 export default function sitemap(): MetadataRoute.Sitemap {

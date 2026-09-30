@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://world-salary-calculator.linkedlab-web.workers.dev"),
-  title: "ClearSalary - International Gross to Net Calculator",
+  metadataBase: new URL("https://netsalarymap.online"),
+  title: "Net Salary Map - International Gross to Net Calculator",
   description:
     "Compare gross and net salaries across 25 countries with transparent, country-specific tax estimates.",
   icons: {
