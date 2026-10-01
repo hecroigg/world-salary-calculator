@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
 import { CountryPageContent } from "@/components/country-page-content";
 import { countries } from "@/lib/countries";
-import { countryFromLocalizedSlug, countryName, localizedPath } from "@/lib/i18n";
+import { countryFromLocalizedSlug, localizedPath } from "@/lib/i18n";
+import { countryMetadata } from "@/lib/seo";
 
 export function generateStaticParams() { return countries.map((country) => ({ country: localizedPath(country,"de").split("/").pop()! })); }
 
 export async function generateMetadata({ params }: { params: Promise<{ country: string }> }): Promise<Metadata> {
   const { country: slug } = await params;
   const country = countryFromLocalizedSlug(countries,"de",slug);
-  return {
-    title: `Gehaltsrechner ${countryName(country,"de")} 2026 - Brutto zu Netto`,
-    description: `Berechne dein geschätztes Nettogehalt in ${countryName(country,"de")} für 2026 inklusive Steuern, Sozialabgaben und Mindestlohn.`,
-    alternates: { canonical: localizedPath(country,"de"), languages: { en: localizedPath(country,"en"), es: localizedPath(country,"es"), de: localizedPath(country,"de"), fr: localizedPath(country,"fr"), "x-default": localizedPath(country,"en") } },
-  };
+  return countryMetadata(country,"de");
 }
 
 export default async function GermanCountryPage({ params }: { params: Promise<{ country: string }> }) {

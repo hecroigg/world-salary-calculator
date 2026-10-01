@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
 import { CountryPageContent } from "@/components/country-page-content";
 import { countries } from "@/lib/countries";
-import { countryFromLocalizedSlug, countryName, localizedPath } from "@/lib/i18n";
+import { countryFromLocalizedSlug, localizedPath } from "@/lib/i18n";
+import { countryMetadata } from "@/lib/seo";
 
 export function generateStaticParams() { return countries.map((country) => ({ country: localizedPath(country,"fr").split("/").pop()! })); }
 
 export async function generateMetadata({ params }: { params: Promise<{ country: string }> }): Promise<Metadata> {
   const { country: slug } = await params;
   const country = countryFromLocalizedSlug(countries,"fr",slug);
-  return {
-    title: `Calculateur de salaire ${countryName(country,"fr")} 2026 - Brut en net`,
-    description: `Calculez votre salaire net estimé en ${countryName(country,"fr")} pour 2026 avec impôts, cotisations sociales et salaire minimum.`,
-    alternates: { canonical: localizedPath(country,"fr"), languages: { en: localizedPath(country,"en"), es: localizedPath(country,"es"), de: localizedPath(country,"de"), fr: localizedPath(country,"fr"), "x-default": localizedPath(country,"en") } },
-  };
+  return countryMetadata(country,"fr");
 }
 
 export default async function FrenchCountryPage({ params }: { params: Promise<{ country: string }> }) {

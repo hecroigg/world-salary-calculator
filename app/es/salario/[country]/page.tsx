@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
 import { CountryPageContent } from "@/components/country-page-content";
 import { countries } from "@/lib/countries";
-import { countryFromLocalizedSlug, countryName, localizedPath } from "@/lib/i18n";
+import { countryFromLocalizedSlug, localizedPath } from "@/lib/i18n";
+import { countryMetadata } from "@/lib/seo";
 
 export function generateStaticParams() { return countries.map((country) => ({ country: localizedPath(country,"es").split("/").pop()! })); }
 
 export async function generateMetadata({ params }: { params: Promise<{ country: string }> }): Promise<Metadata> {
   const { country: slug } = await params;
   const country = countryFromLocalizedSlug(countries,"es",slug);
-  return {
-    title: `Calculadora de salario neto en ${countryName(country,"es")} 2026`,
-    description: `Calcula tu salario neto estimado en ${countryName(country,"es")} para 2026. Impuestos, cotizaciones, salario mínimo y desglose de bruto a neto.`,
-    alternates: { canonical: localizedPath(country,"es"), languages: { en: localizedPath(country,"en"), es: localizedPath(country,"es"), de: localizedPath(country,"de"), fr: localizedPath(country,"fr"), "x-default": localizedPath(country,"en") } },
-  };
+  return countryMetadata(country,"es");
 }
 
 export default async function SpanishCountryPage({ params }: { params: Promise<{ country: string }> }) {
