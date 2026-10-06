@@ -134,12 +134,43 @@ function netherlands(annual: number): Breakdown[] {
 }
 
 function canada(annual: number, p: PrecisionOptions): Breakdown[] {
-  const federal = Math.max(0, progressive(annual, [[57_375, 0.145], [114_750, 0.205], [177_882, 0.26], [253_414, 0.29], [Infinity, 0.33]]) - 16_129 * 0.145);
-  const provinceRates = { ontario: 0.0505, quebec: 0.14, alberta: 0.08, bc: 0.0506 };
-  const province = Math.max(0, annual - 15_000) * provinceRates[p.province ?? "ontario"];
-  const cpp = Math.max(0, Math.min(annual, 74_600) - 3_500) * 0.0595;
-  const ei = Math.min(annual, 68_900) * 0.0164;
-  return [item("Federal income tax", "Impuesto federal", "Bundeseinkommensteuer", "Impôt fédéral", federal), item("Provincial tax", "Impuesto provincial", "Provinzsteuer", "Impôt provincial", province), item("CPP / QPP", "CPP / QPP", "CPP / QPP", "CPP / QPP", cpp), item("Employment Insurance", "Seguro de empleo", "Arbeitslosenversicherung", "Assurance-emploi", ei)];
+  const provinceId = p.province ?? "ontario";
+  const isQuebec = provinceId === "quebec";
+  const pensionRate = isQuebec ? 0.063 : 0.0595;
+  const pension = Math.max(0, Math.min(annual, 74_600) - 3_500) * pensionRate + Math.max(0, Math.min(annual, 85_000) - 74_600) * 0.04;
+  const basePension = Math.max(0, Math.min(annual, 74_600) - 3_500) * (isQuebec ? 0.053 : 0.0495);
+  const ei = Math.min(annual, 68_900) * (isQuebec ? 0.013 : 0.0163);
+  const additionalPension = Math.max(0, pension - basePension);
+  const taxable = Math.max(0, annual - additionalPension);
+  const federalBeforeCredits = progressive(taxable, [[58_523, 0.14], [117_045, 0.205], [181_440, 0.26], [258_482, 0.29], [Infinity, 0.33]]);
+  const federalCredits = (16_452 + Math.min(annual, 1_501) + basePension + ei) * 0.14;
+  const federal = Math.max(0, federalBeforeCredits - federalCredits) * (isQuebec ? 0.835 : 1);
+
+  const provinceConfig = {
+    ontario: { bands: [[53_891, 0.0505], [107_785, 0.0915], [150_000, 0.1116], [220_000, 0.1216], [Infinity, 0.1316]] as [number, number][], allowance: 12_989 },
+    alberta: { bands: [[61_200, 0.08], [154_259, 0.10], [185_111, 0.12], [246_813, 0.13], [370_220, 0.14], [Infinity, 0.15]] as [number, number][], allowance: 22_769 },
+    bc: { bands: [[50_363, 0.0506], [100_728, 0.077], [115_648, 0.105], [140_430, 0.1229], [190_405, 0.147], [265_545, 0.168], [Infinity, 0.205]] as [number, number][], allowance: 13_216 },
+    quebec: { bands: [[53_255, 0.14], [106_495, 0.19], [129_590, 0.24], [Infinity, 0.2575]] as [number, number][], allowance: 18_571 },
+  }[provinceId];
+  let province = Math.max(0, progressive(taxable, provinceConfig.bands) - (provinceConfig.allowance + basePension + ei) * provinceConfig.bands[0][1]);
+  let healthPremium = 0;
+  if (provinceId === "ontario") {
+    const basicProvinceTax = province;
+    const surtax = Math.max(0, basicProvinceTax - 5_818) * 0.2 + Math.max(0, basicProvinceTax - 7_446) * 0.36;
+    province += surtax;
+    if (annual > 20_000 && annual <= 36_000) healthPremium = Math.min(300, (annual - 20_000) * 0.06);
+    else if (annual <= 48_000) healthPremium = 300 + Math.min(150, Math.max(0, annual - 36_000) * 0.06);
+    else if (annual <= 72_000) healthPremium = 450 + Math.min(150, Math.max(0, annual - 48_000) * 0.25);
+    else if (annual <= 200_000) healthPremium = 600 + Math.min(150, Math.max(0, annual - 72_000) * 0.25);
+    else healthPremium = 900;
+  }
+  return [
+    item("Federal income tax", "Impuesto federal", "Bundeseinkommensteuer", "Impôt fédéral", federal),
+    item("Provincial tax", "Impuesto provincial", "Provinzsteuer", "Impôt provincial", province),
+    ...(healthPremium ? [item("Ontario health premium", "Prima de salud de Ontario", "Ontario-Gesundheitsprämie", "Contribution santé de l’Ontario", healthPremium)] : []),
+    item("CPP / QPP", "CPP / QPP", "CPP / QPP", "CPP / QPP", pension),
+    item("Employment Insurance", "Seguro de empleo", "Arbeitslosenversicherung", "Assurance-emploi", ei),
+  ];
 }
 
 const contributionTranslations: Record<string, {de:string;fr:string}> = {

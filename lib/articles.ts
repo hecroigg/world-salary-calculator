@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
 import type { Locale } from "./i18n";
 import { languageAlternates, locales } from "./seo";
+import type { ArticleDetails, ArticleLocale } from "./article-types";
+import { newArticleDetails, newArticleIds, newArticles, type NewArticleId } from "./new-articles";
 
-export type ArticleId = "gross-net"|"foreigners"|"salary-3000"|"minimum-wage"|"expats"|"germany-spain";
-type ArticleLocale = { slug:string; title:string; description:string; intro:string; sections:{heading:string;paragraphs:string[]}[]; faq:{question:string;answer:string}[] };
+export type ExistingArticleId = "gross-net"|"foreigners"|"salary-3000"|"minimum-wage"|"expats"|"germany-spain";
+export type ArticleId = ExistingArticleId | NewArticleId;
 
 export const guideRoots:Record<Locale,string>={en:"/guides",es:"/es/guias",de:"/de/ratgeber",fr:"/fr/guides"};
+const guideIndexCopy:Record<Locale,{title:string;description:string}>={
+ en:{title:"Salary Guides and Gross-to-Net Examples 2026",description:"Practical 2026 salary guides with calculated gross-to-net examples, country comparisons, minimum wages and official sources."},
+ es:{title:"Guías de salario bruto a neto 2026",description:"Guías salariales de 2026 con ejemplos calculados, comparativas por país, salarios mínimos y fuentes oficiales."},
+ de:{title:"Gehaltsratgeber und Brutto-Netto-Beispiele 2026",description:"Gehaltsratgeber 2026 mit berechneten Brutto-Netto-Beispielen, Ländervergleichen, Mindestlöhnen und offiziellen Quellen."},
+ fr:{title:"Guides du salaire brut au net 2026",description:"Guides salariaux 2026 avec exemples calculés, comparaisons par pays, salaires minimums et sources officielles."},
+};
 
-const articles:Record<ArticleId,Record<Locale,ArticleLocale>>={
+const existingArticles:Record<ExistingArticleId,Record<Locale,ArticleLocale>>={
  "gross-net":{
   en:{slug:"germany-gross-to-net-salary-calculator",title:"Germany Gross to Net Salary Calculator 2026",description:"Understand how German gross salary becomes net pay in 2026, including wage tax, pension, health, unemployment and care insurance.",intro:"A German salary offer is usually quoted gross. The amount reaching your bank account depends on wage tax, tax class and four main employee insurance contributions.",sections:[{heading:"From gross salary to taxable income",paragraphs:["Payroll first calculates social-insurance contributions up to their respective ceilings. Pension and unemployment use one ceiling; health and long-term care use another. Deductible employment and insurance amounts then reduce taxable income.","German income tax is progressive rather than a flat percentage. The basic allowance protects the first part of taxable income, while the marginal rate rises with income."]},{heading:"What the calculator includes",paragraphs:["The Germany engine calculates the 2026 income-tax formula, solidarity surcharge where applicable, pension, unemployment, public health and long-term-care insurance. Tax class, church tax, state group, age, children and public or private health can refine the result.","The displayed number is an annualised estimate. Bonuses, company benefits, insurer-specific add-on rates and payroll rounding can change a real payslip."]},{heading:"How to compare an offer",paragraphs:["Compare annual gross pay, not only the monthly figure: German offers can include bonuses or special payments. Then compare estimated annual net pay and divide by working hours if offers have different schedules.","For rent and everyday expenses, use a realistic local budget after calculating net pay, because housing costs vary much more by city than the national tax formula."]}],faq:[{question:"Is gross salary before tax in Germany?",answer:"Yes. Gross salary is pay before employee tax and social-insurance deductions."},{question:"Does tax class change net salary?",answer:"It changes monthly withholding and can materially affect take-home pay, although the final annual assessment may reconcile part of the difference."}]},
   es:{slug:"calculadora-bruto-neto-alemania",title:"Calculadora bruto a neto Alemania 2026",description:"Entiende cómo pasa un salario bruto alemán a neto en 2026: Lohnsteuer, pensión, salud, desempleo y dependencia.",intro:"Las ofertas de trabajo en Alemania suelen indicar salario bruto. Lo que llega a la cuenta depende del impuesto salarial, la clase fiscal y cuatro cotizaciones principales.",sections:[{heading:"Del salario bruto a la base imponible",paragraphs:["La nómina calcula primero las cotizaciones hasta sus topes. Pensión y desempleo comparten un límite; salud y dependencia tienen otro. Los gastos laborales y seguros deducibles reducen después la renta sujeta a impuesto.","El impuesto alemán es progresivo, no un porcentaje fijo. El Grundfreibetrag protege la primera parte de la renta y el tipo marginal aumenta con los ingresos."]},{heading:"Qué incluye la calculadora",paragraphs:["El motor de Alemania aplica la fórmula fiscal de 2026, recargo de solidaridad cuando corresponde, pensión, desempleo, salud pública y dependencia. Clase fiscal, iglesia, estado, edad, hijos y tipo de seguro permiten afinarlo.","El resultado está anualizado. Bonus, beneficios de empresa, recargos de la caja médica y redondeos pueden modificar una nómina real."]},{heading:"Cómo comparar una oferta",paragraphs:["Compara el bruto anual, no solo el mensual: la oferta puede incluir bonus o pagas especiales. Después compara el neto anual estimado y el neto por hora si cambian las jornadas.","Para vivienda y gastos cotidianos, crea un presupuesto local tras calcular el neto, porque el alquiler varía mucho más por ciudad que la fórmula fiscal nacional."]}],faq:[{question:"¿El salario bruto alemán es antes de impuestos?",answer:"Sí. Es la remuneración anterior a impuestos y cotizaciones del trabajador."},{question:"¿La clase fiscal cambia el neto?",answer:"Cambia la retención mensual y puede afectar mucho al importe cobrado, aunque la declaración anual puede ajustar parte de la diferencia."}]},
@@ -46,8 +54,21 @@ const articles:Record<ArticleId,Record<Locale,ArticleLocale>>={
  }
 };
 
-export const articleIds=Object.keys(articles) as ArticleId[];
+const articles = { ...existingArticles, ...newArticles } satisfies Record<ArticleId, Record<Locale, ArticleLocale>>;
+
+const defaultDetails: Record<ExistingArticleId, ArticleDetails> = {
+  "gross-net": { countries: ["germany"], examples: [{ countryId: "germany", gross: 3_200, period: "monthly", hours: 40 }], sources: [] },
+  "foreigners": { countries: ["germany"], examples: [{ countryId: "germany", gross: 3_200, period: "monthly", hours: 40 }], sources: [] },
+  "salary-3000": { countries: ["germany"], examples: [{ countryId: "germany", gross: 3_000, period: "monthly", hours: 40 }], sources: [] },
+  "minimum-wage": { countries: ["germany"], examples: [{ countryId: "germany", gross: 13.9 * 40 * 52 / 12, period: "monthly", hours: 40 }], sources: [] },
+  "expats": { countries: ["germany"], examples: [{ countryId: "germany", gross: 3_200, period: "monthly", hours: 40 }], sources: [] },
+  "germany-spain": { countries: ["germany", "spain"], examples: [{ countryId: "germany", gross: 3_200, period: "monthly", hours: 40 }, { countryId: "spain", gross: 3_200, period: "monthly", hours: 40 }], sources: [] },
+};
+
+export const articleIds: ArticleId[] = [...(Object.keys(existingArticles) as ExistingArticleId[]), ...newArticleIds];
 export const getArticle=(id:ArticleId,locale:Locale)=>articles[id][locale];
+export const getArticleDetails=(id:ArticleId):ArticleDetails=>id in newArticleDetails ? newArticleDetails[id as NewArticleId] : defaultDetails[id as ExistingArticleId];
 export const articlePath=(id:ArticleId,locale:Locale)=>`${guideRoots[locale]}/${articles[id][locale].slug}`;
+export function guideIndexMetadata(locale:Locale):Metadata{const copy=guideIndexCopy[locale];const paths=Object.fromEntries(locales.map(item=>[item,guideRoots[item]])) as Record<Locale,string>;return{title:copy.title,description:copy.description,alternates:{canonical:paths[locale],languages:languageAlternates(paths)},openGraph:{type:"website",url:paths[locale],title:copy.title,description:copy.description,siteName:"Net Salary Map"}}}
 export function articleFromSlug(locale:Locale,slug:string){const id=articleIds.find(item=>articles[item][locale].slug===slug);return id?{id,article:articles[id][locale]}:undefined}
-export function articleMetadata(id:ArticleId,locale:Locale):Metadata{const article=getArticle(id,locale);const paths=Object.fromEntries(locales.map(item=>[item,articlePath(id,item)])) as Record<Locale,string>;return{title:article.title,description:article.description,alternates:{canonical:paths[locale],languages:languageAlternates(paths)},openGraph:{type:"article",locale,url:paths[locale],title:article.title,description:article.description,siteName:"Net Salary Map",publishedTime:"2026-10-01",modifiedTime:"2026-10-01"}}}
+export function articleMetadata(id:ArticleId,locale:Locale):Metadata{const article=getArticle(id,locale);const paths=Object.fromEntries(locales.map(item=>[item,articlePath(id,item)])) as Record<Locale,string>;const localeTag={en:"en_US",es:"es_ES",de:"de_DE",fr:"fr_FR"}[locale];return{title:article.title,description:article.description,alternates:{canonical:paths[locale],languages:languageAlternates(paths)},openGraph:{type:"article",locale:localeTag,url:paths[locale],title:article.title,description:article.description,siteName:"Net Salary Map",publishedTime:"2026-10-06",modifiedTime:"2026-10-06"},twitter:{card:"summary_large_image",title:article.title,description:article.description}}}

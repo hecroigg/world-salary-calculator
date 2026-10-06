@@ -3,7 +3,7 @@ import { countries } from "@/lib/countries";
 import { localizedPath, type Locale } from "@/lib/i18n";
 import { legalPath, type LegalKind } from "@/lib/legal-routes";
 import { authorityPath, type AuthorityKind } from "@/lib/authority";
-import { articleIds, articlePath } from "@/lib/articles";
+import { articleIds, articlePath, guideRoots } from "@/lib/articles";
 
 export const dynamic = "force-static";
 const base = "https://netsalarymap.online";
@@ -33,6 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   });
   const authorityKinds: AuthorityKind[] = ["about","methodology","sources"];
   const authorityPages=authorityKinds.flatMap(kind=>{const languages=Object.fromEntries(locales.map(locale=>[locale,base+authorityPath(locale,kind)]));return locales.map(locale=>({url:base+authorityPath(locale,kind),lastModified:new Date("2026-10-01"),changeFrequency:"monthly" as const,priority:0.7,alternates:{languages:{...languages,"x-default":base+authorityPath("en",kind)}}}))});
-  const articlePages=articleIds.flatMap(id=>{const languages=Object.fromEntries(locales.map(locale=>[locale,base+articlePath(id,locale)]));return locales.map(locale=>({url:base+articlePath(id,locale),lastModified:new Date("2026-10-01"),changeFrequency:"monthly" as const,priority:0.75,alternates:{languages:{...languages,"x-default":base+articlePath(id,"en")}}}))});
-  return [...countryPages,...authorityPages,...articlePages,...legalPages];
+  const articlePages=articleIds.flatMap(id=>{const languages=Object.fromEntries(locales.map(locale=>[locale,base+articlePath(id,locale)]));return locales.map(locale=>({url:base+articlePath(id,locale),lastModified:new Date("2026-10-06"),changeFrequency:"monthly" as const,priority:0.75,alternates:{languages:{...languages,"x-default":base+articlePath(id,"en")}}}))});
+  const guideIndexes=locales.map(locale=>({url:base+guideRoots[locale],lastModified:new Date("2026-10-06"),changeFrequency:"monthly" as const,priority:0.8,alternates:{languages:{...Object.fromEntries(locales.map(item=>[item,base+guideRoots[item]])),"x-default":base+guideRoots.en}}}));
+  return [...countryPages,...authorityPages,...guideIndexes,...articlePages,...legalPages];
 }
