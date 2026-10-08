@@ -3,6 +3,10 @@
   "name": "world-salary-calculator",
   "compatibility_date": "2026-09-29",
   "main": "worker.js",
+  "routes": [
+    { "pattern": "netsalarymap.online", "custom_domain": true },
+    { "pattern": "www.netsalarymap.online", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./out",
     "not_found_handling": "404-page",
