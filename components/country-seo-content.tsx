@@ -5,6 +5,7 @@ import { localizedPath } from "@/lib/i18n";
 import { authorityPath } from "@/lib/authority";
 import { articleIds, articlePath, getArticle, getArticleDetails } from "@/lib/articles";
 import { relatedCountries } from "@/lib/related-countries";
+import { CountryWorkedExamples } from "@/components/country-worked-examples";
 
 const localeTags: Record<Locale,string> = {en:"en-US",es:"es-ES",de:"de-DE",fr:"fr-FR"};
 const formatMoney = (value:number,country:Country,locale:Locale) => new Intl.NumberFormat(localeTags[locale],{style:"currency",currency:country.currency,maximumFractionDigits:0}).format(value);
@@ -41,6 +42,7 @@ export function CountrySeoContent({country,locale}:{country:Country;locale:Local
         <h3 className="mt-7 font-black">{x.links}</h3><a className="mt-3 block text-sm font-bold text-blue-700 underline decoration-blue-200 underline-offset-4" href={authorityPath(locale,"methodology")}>{t.assumptions}</a><a className="mt-2 block text-sm font-bold text-blue-700 underline decoration-blue-200 underline-offset-4" href={authorityPath(locale,"sources")}>{t.sources}</a>
       </article>
     </div>
+    <CountryWorkedExamples country={country} locale={locale}/>
     <div className="mt-6 grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2"><article className="min-w-0 rounded-3xl border bg-white p-5 shadow-sm sm:p-7"><h2 className="text-xl font-black">{x.related}</h2><div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">{related.map(item=><a key={item.id} className="rounded-xl bg-slate-50 p-4 font-bold hover:bg-blue-50 hover:text-blue-700" href={localizedPath(item,locale)}>{item.flag} {countryName(item,locale)}</a>)}</div></article><article className="min-w-0 rounded-3xl border bg-white p-5 shadow-sm sm:p-7"><h2 className="text-xl font-black">{x.guides}</h2>{relevantArticles.length?<div className="mt-4 space-y-3">{relevantArticles.map(id=><a key={id} className="block font-bold text-blue-700 underline decoration-blue-200 underline-offset-4" href={articlePath(id,locale)}>{getArticle(id,locale).title}</a>)}</div>:<p className="mt-3 text-sm leading-7 text-slate-600">{countryGuides[country.id][locale]}</p>}{country.id==="germany"?<div className="mt-6 rounded-2xl bg-blue-50 p-4"><h3 className="font-black text-blue-950">{x.germany}</h3><p className="mt-2 text-sm leading-6 text-blue-950/75">{x.germanyCopy}</p><a href="https://germanybase.de/tools/cost-of-living" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex font-bold text-blue-800 underline underline-offset-4">GermanyBase</a></div>:null}<a className="mt-4 inline-flex font-bold text-blue-700 underline underline-offset-4" href={authorityPath(locale,"methodology")}>{x.links}</a></article></div>
   </section>;
 }
