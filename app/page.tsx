@@ -26,7 +26,7 @@ export default function Home() {
         <nav className="flex flex-wrap justify-end gap-4 text-sm font-bold text-slate-600">
           <a className="hover:text-blue-700" href="/guides">Guides</a>
           <a className="hover:text-blue-700" href="/methodology">Methodology</a>
-          <a className="hover:text-blue-700" href="/sources">Sources</a>
+          <a className="hover:text-blue-700" href="/sources-data-updates">Sources</a>
           <a className="hover:text-blue-700" href="/about">About</a>
         </nav>
       </div>
@@ -70,14 +70,14 @@ export default function Home() {
         <p className="text-xs font-bold uppercase tracking-widest text-blue-600">What this site does not claim</p>
         <h2 className="mt-2 text-2xl font-black">An estimate is not a payslip or tax return.</h2>
         <p className="mt-4 leading-7 text-slate-600">Employer benefits, deductions, local taxes, family circumstances, special allowances and payroll timing can change the final number. Every calculator page states the main assumptions and links to source material so you can verify the part that matters for your decision.</p>
-        <a className="mt-5 inline-flex items-center gap-1 font-bold text-blue-700 underline decoration-blue-200 underline-offset-4" href="/sources">See the source directory <ArrowRight className="size-4"/></a>
+        <a className="mt-5 inline-flex items-center gap-1 font-bold text-blue-700 underline decoration-blue-200 underline-offset-4" href="/sources-data-updates">See the source directory <ArrowRight className="size-4"/></a>
       </article>
     </section>
 
     <footer className="border-t bg-white">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-slate-500 lg:px-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-between"><b className="text-slate-900">Net Salary Map</b><span>Educational estimates · Updated for 2026</span></div>
-        <nav className="flex flex-wrap gap-x-5 gap-y-2"><a href="/about">About</a><a href="/methodology">Methodology</a><a href="/sources">Sources</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/legal">Legal</a><a href="/contact">Contact</a></nav>
+        <nav className="flex flex-wrap gap-x-5 gap-y-2"><a href="/about">About</a><a href="/methodology">Methodology</a><a href="/sources-data-updates">Sources</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/legal">Legal</a><a href="/contact">Contact</a></nav>
       </div>
     </footer>
   </main>;
