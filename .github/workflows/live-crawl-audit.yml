@@ -2,6 +2,8 @@ name: Public live crawl audit
 on:
   pull_request:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   check-public-sites:
@@ -16,3 +18,5 @@ jobs:
         run: node scripts/audit-live-sites.mjs
       - name: Investigate crawler user-agent Cloudflare rules
         run: node scripts/check-user-agents.mjs
+      - name: Check production rollout markers
+        run: node scripts/check-production-version.mjs
