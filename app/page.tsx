@@ -59,6 +59,24 @@ export default function Home() {
       </div>
     </section>
 
+    <section className="border-b bg-white">
+      <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+        <h2 className="text-lg font-black">Calculators and guides in your language</h2>
+        <p className="mt-1 text-sm text-slate-600">Choose a language to open the localised Germany calculator and explore the full salary guide library.</p>
+        <nav aria-label="Available languages" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { name: "English", country: "/salary/germany", guides: "/guides", code: "en" },
+            { name: "Español", country: "/es/salario/alemania", guides: "/es/guias", code: "es" },
+            { name: "Deutsch", country: "/de/gehalt/deutschland", guides: "/de/ratgeber", code: "de" },
+            { name: "Français", country: "/fr/salaire/allemagne", guides: "/fr/guides", code: "fr" },
+          ].map(item => <div className="rounded-xl border p-4" key={item.code} lang={item.code}>
+            <b className="block">{item.name}</b>
+            <a href={item.country} hrefLang={item.code} className="mt-2 block text-sm font-semibold text-blue-700 underline">Salary calculator</a>
+            <a href={item.guides} hrefLang={item.code} className="mt-1 block text-sm font-semibold text-blue-700 underline">Salary guides</a>
+          </div>)}
+        </nav>
+      </div>
+    </section>
     <section className="mx-auto grid max-w-7xl gap-6 px-5 py-14 lg:grid-cols-2 lg:px-8">
       <article className="rounded-3xl border bg-white p-7 shadow-sm">
         <p className="text-xs font-bold uppercase tracking-widest text-blue-600">How to use the estimate</p>
