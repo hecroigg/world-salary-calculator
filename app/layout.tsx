@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { CookieConsent } from "@/components/cookie-consent";
 import "./globals.css";
 
@@ -34,13 +33,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <Script
-          id="google-adsense"
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`}
-          crossOrigin="anonymous"
-          strategy="beforeInteractive"
-        />
         {children}
         <CookieConsent />
       </body>

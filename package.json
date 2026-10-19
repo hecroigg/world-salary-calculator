@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build --webpack && node scripts/localize-html-lang.mjs",
     "pages:build": "next build --webpack && node scripts/localize-html-lang.mjs",
-    "start": "next start"
+    "start": "next start",
+    "seo:check": "node scripts/check-seo-output.mjs"
   },
   "dependencies": {
     "@next/third-parties": "^16.3.4",

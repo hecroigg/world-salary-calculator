@@ -6,6 +6,7 @@ import { authorityPath } from "@/lib/authority";
 import { articleIds, articlePath, getArticle, getArticleDetails } from "@/lib/articles";
 import { relatedCountries } from "@/lib/related-countries";
 import { CountryWorkedExamples } from "@/components/country-worked-examples";
+import { locales } from "@/lib/seo";
 
 const localeTags: Record<Locale,string> = {en:"en-US",es:"es-ES",de:"de-DE",fr:"fr-FR"};
 const formatMoney = (value:number,country:Country,locale:Locale) => new Intl.NumberFormat(localeTags[locale],{style:"currency",currency:country.currency,maximumFractionDigits:0}).format(value);
@@ -23,6 +24,10 @@ export function CountrySeoContent({country,locale}:{country:Country;locale:Local
   };
   const x=extra[locale];
   return <section className="mx-auto w-full min-w-0 max-w-7xl px-4 py-10 sm:px-5 lg:px-8">
+    <nav aria-label="Read this calculator in another language" className="mb-6 flex flex-wrap items-center gap-2">
+      <span className="mr-2 text-sm font-semibold text-slate-600">Languages:</span>
+      {locales.map(item=><a key={item} href={localizedPath(country,item)} hrefLang={item} lang={item} aria-current={item===locale?"page":undefined} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${item===locale?"border-blue-600 bg-blue-50 text-blue-800":"border-slate-200 bg-white text-blue-700 hover:border-blue-300"}`}>{{en:"English",es:"Español",de:"Deutsch",fr:"Français"}[item]}</a>)}
+    </nav>
     <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[1.05fr_.95fr]">
       <article className="min-w-0 rounded-3xl border bg-white p-5 shadow-sm sm:p-7">
         <p className="text-xs font-bold uppercase tracking-widest text-blue-600">{country.flag} {countryName(country,locale)}</p>
