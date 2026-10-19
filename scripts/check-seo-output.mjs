@@ -51,8 +51,13 @@ for (const textUrl of urls) {
   if (!/<h1\b/i.test(html)) note(`No h1 on ${textUrl}`);
   if (!/rel="canonical"/.test(html)) note(`No canonical on ${textUrl}`);
   const canonicalMatch = html.match(/<link\b[^>]*rel="canonical"[^>]*href="([^"]+)"/);
-  if (canonicalMatch && canonicalMatch[1] !== textUrl) {
-    note(`Incorrect canonical ${canonicalMatch[1]} on ${textUrl}`);
+  if (canonicalMatch) {
+    const canonical = new URL(canonicalMatch[1], origin);
+    const expected = new URL(textUrl);
+    // The origin-only home canonical and origin + "/" are the same URL.
+    if (canonical.href !== expected.href) {
+      note(`Incorrect canonical ${canonical.href} on ${textUrl}`);
+    }
   }
   const expectedLang = pathname.startsWith("/es/") ? "es"
     : pathname.startsWith("/de/") ? "de"
