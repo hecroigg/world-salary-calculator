@@ -14,3 +14,5 @@ jobs:
           node-version: '22'
       - name: Crawl production sitemaps and sample routes (read-only)
         run: node scripts/audit-live-sites.mjs
+      - name: Investigate crawler user-agent Cloudflare rules
+        run: node scripts/check-user-agents.mjs
