@@ -158,3 +158,57 @@ const legacyStatus = await mapLimit(legacyPaths, 5, statusProbe);
 legacyStatus.forEach(item => console.log("HISTORIC_404", JSON.stringify(item)));
 const lowStatus = await mapLimit(lowIndexPaths, 5, statusProbe);
 lowStatus.forEach(item => console.log("CRAWLED_NOT_INDEXED", JSON.stringify(item)));
+
+
+// All 34 Google-discovered but not yet crawled pages from the Search Console export.
+const discoveredNotCrawledPaths = [
+ "/advertiser-disclosure",
+ "/authorities",
+ "/cities/berlin",
+ "/cities/bremen",
+ "/cities/cologne",
+ "/cities/dresden",
+ "/cities/dusseldorf",
+ "/cities/frankfurt",
+ "/cities/freiburg",
+ "/cities/hamburg",
+ "/cities/hannover",
+ "/cities/heidelberg",
+ "/cities/karlsruhe",
+ "/cities/leipzig",
+ "/cities/mannheim",
+ "/cities/munich",
+ "/contact",
+ "/daily-life",
+ "/editorial-policy",
+ "/guides/deutschlandticket",
+ "/guides/german-documents-explained",
+ "/guides/german-supermarkets",
+ "/guides/german-tax-id",
+ "/guides/internet-germany",
+ "/guides/jobs-without-german",
+ "/guides/minijob-germany",
+ "/guides/schufa-germany",
+ "/guides/wohnungsgeberbestaetigung",
+ "/guides/working-in-germany",
+ "/healthcare",
+ "/privacy-policy",
+ "/tools/rental-scam-checker",
+ "/trabajo/calculadora-salario",
+ "/trabajo/tipos-de-empleo"
+];
+const sitemapResponse = await fetchHtml("https://germanybase.de/sitemap.xml");
+const actualSitemapPaths = new Set(xmlLocs(sitemapResponse.body).map(item => {
+  try { return new URL(item).pathname; } catch { return ""; }
+}));
+const discoveredResults = await mapLimit(discoveredNotCrawledPaths, 5, async path => ({
+  ...await statusProbe(path),
+  inSitemap: actualSitemapPaths.has(path)
+}));
+discoveredResults.forEach(item => console.log("DISCOVERED_NOT_CRAWLED",JSON.stringify(item)));
+console.log("DISCOVERED_SUMMARY",JSON.stringify({
+  total:discoveredResults.length,
+  inSitemap:discoveredResults.filter(item=>item.inSitemap).length,
+  valid:discoveredResults.filter(item=>item.firstStatus===200&&item.finalStatus===200&&!item.noindex).length,
+  bad:discoveredResults.filter(item=>item.firstStatus!==200||item.finalStatus!==200||item.noindex).length,
+}));
