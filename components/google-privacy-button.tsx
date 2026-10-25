@@ -14,8 +14,8 @@ export function GooglePrivacyButton({ label }: { label: string }) {
   useEffect(() => {
     const host = window as GoogleFcWindow;
     host.googlefc ||= {};
-    host.googlefc.callbackQueue ||= [];
-    host.googlefc.callbackQueue.push({CONSENT_API_READY: () => setReady(true)});
+    const queue = host.googlefc.callbackQueue ||= ([] as Array<{ CONSENT_API_READY: () => void }>);
+    queue.push({CONSENT_API_READY: () => setReady(true)});
   }, []);
   if (!ready) return null;
 
