@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CookieConsent } from "@/components/cookie-consent";
+import Script from "next/script";
 import "./globals.css";
 
 const adsensePublisherId = "ca-pub-8337311370258201";
@@ -32,6 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head><Script id="google-adsense-cmp" async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`} crossOrigin="anonymous" strategy="beforeInteractive"/></head>
       <body className="antialiased">
         {children}
         <CookieConsent />
