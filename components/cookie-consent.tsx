@@ -1,26 +1,25 @@
 "use client";
 
 import { GoogleAnalytics } from "@next/third-parties/google";
-import Script from "next/script";
+import { GooglePrivacyButton } from "@/components/google-privacy-button";
 import { useEffect, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { legalPath } from "@/lib/legal-routes";
 
-type Consent = { analytics: boolean; advertising: boolean };
+type Consent = { analytics: boolean };
 
 const STORAGE_KEY = "net-salary-map-consent-v1";
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
-const adsensePublisherId = "ca-pub-8337311370258201";
 
 const copy: Record<Locale, {
   title: string; body: string; accept: string; reject: string; manage: string;
   save: string; necessary: string; necessaryCopy: string; analytics: string;
-  analyticsCopy: string; advertising: string; advertisingCopy: string; settings: string; policy: string;
+  analyticsCopy: string; adsPreferences: string; settings: string; policy: string;
 }> = {
-  en: { title: "Your privacy matters", body: "We use necessary storage to remember your choice. Optional analytics help us improve the calculator and are loaded only with your consent.", accept: "Accept all", reject: "Reject optional", manage: "Manage", save: "Save choices", necessary: "Necessary", necessaryCopy: "Required for privacy preferences and core site functions.", analytics: "Analytics", analyticsCopy: "Anonymous usage measurement with Google Analytics.", advertising: "Advertising", advertisingCopy: "Google AdSense may use identifiers for advertising. This optional script loads only after you agree.", settings: "Cookie settings", policy: "Cookie policy" },
-  es: { title: "Tu privacidad importa", body: "Usamos almacenamiento necesario para recordar tu elección. Las analíticas opcionales nos ayudan a mejorar la calculadora y solo se cargan con tu consentimiento.", accept: "Aceptar todo", reject: "Rechazar opcionales", manage: "Gestionar", save: "Guardar selección", necessary: "Necesarias", necessaryCopy: "Imprescindibles para las preferencias de privacidad y el funcionamiento básico.", analytics: "Analíticas", analyticsCopy: "Medición anónima del uso mediante Google Analytics.", advertising: "Publicidad", advertisingCopy: "Google AdSense puede usar identificadores para publicidad. El script opcional solo se carga si aceptas.", settings: "Configurar cookies", policy: "Política de cookies" },
-  de: { title: "Deine Privatsphäre ist wichtig", body: "Notwendige Speicherung merkt sich deine Auswahl. Optionale Analysen helfen uns, den Rechner zu verbessern, und werden nur mit deiner Einwilligung geladen.", accept: "Alle akzeptieren", reject: "Optionale ablehnen", manage: "Verwalten", save: "Auswahl speichern", necessary: "Notwendig", necessaryCopy: "Erforderlich für Datenschutzeinstellungen und grundlegende Funktionen.", analytics: "Analyse", analyticsCopy: "Anonyme Nutzungsmessung mit Google Analytics.", advertising: "Werbung", advertisingCopy: "Google AdSense kann Kennungen für Werbung verwenden. Das optionale Skript wird erst nach deiner Einwilligung geladen.", settings: "Cookie-Einstellungen", policy: "Cookie-Richtlinie" },
-  fr: { title: "Votre vie privée compte", body: "Un stockage nécessaire mémorise votre choix. Les analyses facultatives nous aident à améliorer le calculateur et ne sont chargées qu’avec votre consentement.", accept: "Tout accepter", reject: "Refuser les options", manage: "Gérer", save: "Enregistrer", necessary: "Nécessaires", necessaryCopy: "Requis pour les préférences de confidentialité et les fonctions essentielles.", analytics: "Analyse", analyticsCopy: "Mesure anonyme de l’utilisation avec Google Analytics.", advertising: "Publicité", advertisingCopy: "Google AdSense peut utiliser des identifiants publicitaires. Ce script facultatif ne se charge qu’après votre accord.", settings: "Paramètres des cookies", policy: "Politique des cookies" },
+  en: { title: "Your privacy matters", body: "We remember your choice about optional Google Analytics. Advertising choices are managed separately through Google's certified European consent message.", accept: "Accept all", reject: "Reject optional", manage: "Manage", save: "Save choices", necessary: "Necessary", necessaryCopy: "Required for privacy preferences and core site functions.", analytics: "Analytics", analyticsCopy: "Anonymous usage measurement with Google Analytics.", adsPreferences: "Google advertising choices", settings: "Cookie settings", policy: "Cookie policy" },
+  es: { title: "Tu privacidad importa", body: "Guardamos tu elección sobre Google Analytics opcional. El consentimiento publicitario se gestiona aparte mediante el mensaje europeo certificado de Google.", accept: "Aceptar todo", reject: "Rechazar opcionales", manage: "Gestionar", save: "Guardar selección", necessary: "Necesarias", necessaryCopy: "Imprescindibles para las preferencias de privacidad y el funcionamiento básico.", analytics: "Analíticas", analyticsCopy: "Medición anónima del uso mediante Google Analytics.", adsPreferences: "Preferencias de publicidad de Google", settings: "Configurar cookies", policy: "Política de cookies" },
+  de: { title: "Deine Privatsphäre ist wichtig", body: "Wir speichern deine Wahl zur optionalen Google-Analyse. Werbeeinwilligung wird separat über den zertifizierten europäischen Dialog von Google verwaltet.", accept: "Alle akzeptieren", reject: "Optionale ablehnen", manage: "Verwalten", save: "Auswahl speichern", necessary: "Notwendig", necessaryCopy: "Erforderlich für Datenschutzeinstellungen und grundlegende Funktionen.", analytics: "Analyse", analyticsCopy: "Anonyme Nutzungsmessung mit Google Analytics.", adsPreferences: "Google-Werbeeinstellungen", settings: "Cookie-Einstellungen", policy: "Cookie-Richtlinie" },
+  fr: { title: "Votre vie privée compte", body: "Nous conservons votre choix concernant Google Analytics facultatif. Le consentement publicitaire est géré séparément par le message européen certifié de Google.", accept: "Tout accepter", reject: "Refuser les options", manage: "Gérer", save: "Enregistrer", necessary: "Nécessaires", necessaryCopy: "Requis pour les préférences de confidentialité et les fonctions essentielles.", analytics: "Analyse", analyticsCopy: "Mesure anonyme de l’utilisation avec Google Analytics.", adsPreferences: "Préférences publicitaires Google", settings: "Paramètres des cookies", policy: "Politique des cookies" },
 };
 
 function currentLocale(): Locale {
@@ -47,7 +46,6 @@ export function CookieConsent() {
   const [ready, setReady] = useState(false);
   const [settings, setSettings] = useState(false);
   const [analytics, setAnalytics] = useState(false);
-  const [advertising, setAdvertising] = useState(false);
 
   useEffect(() => {
     setLocale(currentLocale());
@@ -55,9 +53,8 @@ export function CookieConsent() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as Consent;
-        setConsent({ analytics: Boolean(parsed.analytics), advertising: Boolean(parsed.advertising) });
+        setConsent({ analytics: Boolean(parsed.analytics) });
         setAnalytics(Boolean(parsed.analytics));
-        setAdvertising(Boolean(parsed.advertising));
       } catch {
         window.localStorage.removeItem(STORAGE_KEY);
       }
@@ -68,12 +65,9 @@ export function CookieConsent() {
   const persist = (next: Consent) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     if (!next.analytics) clearAnalyticsCookies();
-    const mustReload = Boolean(consent?.advertising && !next.advertising);
     setConsent(next);
     setAnalytics(next.analytics);
-    setAdvertising(next.advertising);
     setSettings(false);
-    if (mustReload) window.location.reload();
   };
 
   if (!ready) return null;
@@ -81,26 +75,24 @@ export function CookieConsent() {
 
   return <>
     {consent?.analytics && gaId ? <GoogleAnalytics gaId={gaId} /> : null}
-    {consent?.advertising ? <Script id="google-adsense-consented" async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`} crossOrigin="anonymous" strategy="afterInteractive"/> : null}
     {!consent || settings ? (
       <div className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,.24)] sm:bottom-5 sm:p-6" role="dialog" aria-label={t.title}>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
             <h2 className="text-lg font-black text-slate-950">{t.title}</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">{t.body}</p>
-            <a className="mt-2 inline-flex text-sm font-bold text-blue-700 underline" href={legalPath(locale,"cookies")}>{t.policy}</a>
+            <a className="mt-2 inline-flex text-sm font-bold text-blue-700 underline" href={legalPath(locale,"cookies")}>{t.policy}</a><GooglePrivacyButton label={t.adsPreferences}/>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
             <button type="button" className="rounded-xl border px-4 py-2 text-sm font-bold" onClick={() => setSettings(value => !value)}>{t.manage}</button>
-            <button type="button" className="rounded-xl border px-4 py-2 text-sm font-bold" onClick={() => persist({analytics:false,advertising:false})}>{t.reject}</button>
-            <button type="button" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white" onClick={() => persist({analytics:true,advertising:true})}>{t.accept}</button>
+            <button type="button" className="rounded-xl border px-4 py-2 text-sm font-bold" onClick={() => persist({analytics:false})}>{t.reject}</button>
+            <button type="button" className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white" onClick={() => persist({analytics:true})}>{t.accept}</button>
           </div>
         </div>
         {settings ? <div className="mt-5 grid gap-3 border-t pt-5 sm:grid-cols-2">
           <div className="rounded-xl bg-slate-50 p-4"><div className="flex items-center justify-between"><b>{t.necessary}</b><span className="text-xs font-bold text-emerald-700">ON</span></div><p className="mt-1 text-xs leading-5 text-slate-600">{t.necessaryCopy}</p></div>
           <label className="rounded-xl bg-slate-50 p-4"><span className="flex items-center justify-between"><b>{t.analytics}</b><input type="checkbox" checked={analytics} onChange={(event) => setAnalytics(event.target.checked)} className="size-5 accent-blue-600" /></span><span className="mt-1 block text-xs leading-5 text-slate-600">{t.analyticsCopy}</span></label>
-          <label className="rounded-xl bg-slate-50 p-4"><span className="flex items-center justify-between"><b>{t.advertising}</b><input type="checkbox" checked={advertising} onChange={(event) => setAdvertising(event.target.checked)} className="size-5 accent-blue-600"/></span><span className="mt-1 block text-xs leading-5 text-slate-600">{t.advertisingCopy}</span></label>
-          <button type="button" className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white sm:col-span-2" onClick={() => persist({analytics,advertising})}>{t.save}</button>
+          <button type="button" className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white sm:col-span-2" onClick={() => persist({analytics})}>{t.save}</button>
         </div> : null}
       </div>
     ) : (
