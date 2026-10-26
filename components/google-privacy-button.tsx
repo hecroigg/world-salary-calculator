@@ -2,24 +2,52 @@
 
 import { useEffect, useState } from "react";
 
+type GoogleFcCallback = { CONSENT_API_READY: () => void } | (() => void);
+type GoogleFcQueue = { push: (callback: GoogleFcCallback) => unknown };
 type GoogleFc = {
-  callbackQueue?: { push: (callback: { CONSENT_API_READY: () => void }) => number };
+  callbackQueue?: GoogleFcQueue;
   showRevocationMessage?: () => void;
 };
 type GoogleFcWindow = Window & { googlefc?: GoogleFc };
 
-/** Google-certified EU advertising choices, separate from our Analytics opt-in. */
+/**
+ * Google only exposes its revocation flow when the privacy messaging API
+ * is usable. Consent API readiness alone is not proof that the method exists
+ * (for example, the site may not yet be approved for advertising).
+ */
 export function GooglePrivacyButton({ label }: { label: string }) {
-  const [ready, setReady] = useState(false);
+  const [available, setAvailable] = useState(false);
+
   useEffect(() => {
+    let mounted = true;
     const host = window as GoogleFcWindow;
     host.googlefc ||= {};
-    const queue = host.googlefc.callbackQueue ||= ([] as Array<{ CONSENT_API_READY: () => void }>);
-    queue.push({CONSENT_API_READY: () => setReady(true)});
+    const queue = host.googlefc.callbackQueue ||= [] as GoogleFcCallback[];
+    queue.push({
+      CONSENT_API_READY: () => {
+        if (!mounted) return;
+        setAvailable(typeof (window as GoogleFcWindow).googlefc?.showRevocationMessage === "function");
+      },
+    });
+    return () => { mounted = false; };
   }, []);
-  if (!ready) return null;
 
-  return <button type="button" className="mt-2 ml-3 inline-flex text-sm font-bold text-blue-700 underline" onClick={() => {
-    (window as GoogleFcWindow).googlefc?.showRevocationMessage?.();
-  }}>{label}</button>;
+  // Never display a control that silently does nothing while AdSense is
+  // awaiting site approval or Google's CMP revocation API is unavailable.
+  if (!available) return null;
+
+  return (
+    <button type="button" className="mt-2 ml-3 inline-flex text-sm font-bold text-blue-700 underline" onClick={() => {
+      const googlefc = (window as GoogleFcWindow).googlefc;
+      const action = googlefc?.showRevocationMessage;
+      if (!googlefc?.callbackQueue || typeof action !== "function") {
+        setAvailable(false);
+        return;
+      }
+      // Official AdSense revocation pattern: push the API method to Google's queue.
+      googlefc.callbackQueue.push(action);
+    }}>
+      {label}
+    </button>
+  );
 }
