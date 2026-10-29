@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const languages = Object.fromEntries(locales.map((locale) => [locale, base + localizedPath(country,locale)]));
     return locales.map((locale) => ({
       url: base + localizedPath(country,locale),
-      lastModified: new Date("2026-10-08"),
+      lastModified: new Date(country.id === "spain" ? "2026-10-29" : "2026-10-08"),
       changeFrequency: "monthly" as const,
       priority: 0.9,
       alternates: { languages: { ...languages, "x-default": base + localizedPath(country,"en") } },
