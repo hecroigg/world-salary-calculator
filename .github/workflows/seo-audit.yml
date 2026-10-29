@@ -16,5 +16,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/test-tax-engine.mjs
+      - run: node scripts/test-pay-schedule.mjs
       - run: npm run build
       - run: npm run seo:check
