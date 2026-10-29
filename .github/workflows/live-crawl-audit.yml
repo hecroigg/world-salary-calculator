@@ -2,9 +2,14 @@ name: Public live crawl audit
 on:
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '37 06 * * *'
   push:
     branches: [main]
 
+concurrency:
+  group: public-seo-watch-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check-public-sites:
     runs-on: ubuntu-latest

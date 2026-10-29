@@ -32,6 +32,15 @@ for (const site of sites) {
   console.log("Sitemap loc entries:", sitemapUrls.length);
   const raw = [...new Set([...sitemapUrls, ...site.samples.map(path => site.domain + path)])];
   const errors = [];
+  for (const [name, response] of [["robots.txt", robots], ["sitemap.xml", sitemap], ["ads.txt", ads]]) {
+    if (response.status !== 200) errors.push({url: site.domain + "/" + name, status: response.status, reason: "Required public endpoint unavailable"});
+  }
+  if (ads.status === 200 && !ads.text.includes("google.com, pub-8337311370258201, DIRECT")) {
+    errors.push({url: site.domain + "/ads.txt", reason:"Publisher record not found"});
+  }
+  if (robots.status === 200 && !robots.text.includes(site.domain + "/sitemap.xml")) {
+    errors.push({url: site.domain + "/robots.txt", reason:"Expected sitemap declaration missing"});
+  }
   const runQueue = [...raw];
   let passed = 0;
   const workers = Array.from({ length: 6 }, async () => {
@@ -53,3 +62,11 @@ for (const site of sites) {
   allResults.push({domain: site.domain, tested:raw.length, errors:errors.length, examples:errors.slice(0,15)});
 }
 console.log("\nAUDIT SUMMARY",JSON.stringify(allResults,null,2));
+
+// Fail the scheduled health check when a required endpoint or sitemap URL is broken.
+// The daily Search Console analysis is separate: traffic changes are not HTTP failures.
+const unexpected = allResults.reduce((total, item) => total + item.errors, 0);
+if (unexpected > 0) {
+  console.error("Public SEO watch failed:", unexpected, "unexpected responses. Check Cloudflare and the detailed URLs above.");
+  process.exitCode = 1;
+}

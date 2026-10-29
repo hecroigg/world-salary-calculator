@@ -1,0 +1,46 @@
+name: Verified Cloudflare deployment
+on:
+  workflow_run:
+    workflows: ["SEO build audit"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netsalarymap-production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # Disabled by default until Cloudflare's automatic Git builds are turned
+    # off and this repository has a restricted deployment API token.
+    if: ${{ vars.ENABLE_GITHUB_CLOUDFLARE_DEPLOY == 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Verify credentials exist
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Add Cloudflare deployment secrets in GitHub"; exit 1; }
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Export all pages and test sitemap
+        run: npm run build && npm run seo:check
+      - name: Deploy to the existing Worker (no Cloudflare build queue)
+        run: npx --yes wrangler@4.136.3 deploy --config wrangler.jsonc
+      - name: Verify public routes
+        run: |
+          curl -fsSL --retry 3 --retry-delay 3 https://netsalarymap.online/robots.txt | grep -q sitemap.xml
+          curl -fsSL --retry 3 --retry-delay 3 https://netsalarymap.online/ads.txt | grep -q 'pub-8337311370258201'
+          curl -fsSL --retry 3 --retry-delay 3 https://netsalarymap.online/salary/germany >/dev/null
